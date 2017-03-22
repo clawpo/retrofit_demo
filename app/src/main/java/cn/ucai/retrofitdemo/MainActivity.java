@@ -21,6 +21,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,11 +80,13 @@ public class MainActivity extends AppCompatActivity {
                 .baseUrl(root)
                 .build();
         FuliServer server = retrofit.create(FuliServer.class);
-        Call<List<CategoryChildBean>> call = server.getChild(344);
+        Call<List<CategoryChildBean>> call = server.getChild(String.valueOf(344));
         call.enqueue(new Callback<List<CategoryChildBean>>() {
             @Override
             public void onResponse(Call<List<CategoryChildBean>> call,
                                    Response<List<CategoryChildBean>> response) {
+                Log.e("main","call="+call);
+                Log.e("main","response="+response);
                 List<CategoryChildBean> childBeanList = response.body();
                 Log.e("main","list="+childBeanList);
                 if (childBeanList!=null){
@@ -101,25 +104,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getUser() {
+        Log.e("main","getUser.......");
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(root)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         FuliServer server = retrofit.create(FuliServer.class);
-        Call<Result> call = server.getUser("aaa456789");
-        call.enqueue(new Callback<Result>() {
+        Call<String> call = server.getUser("aaa456789");
+        call.enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<Result> call, Response<Result> response) {
-                Result result = response.body();
-                Log.e("main","result="+result);
-                if (result!=null){
-                    User user = (User) result.getRetData();
+            public void onResponse(Call<String> call, Response<String> response) {
+                Log.e("main","call="+call);
+                Log.e("main","response="+response);
+                String s = response.body();
+                Log.e("main","s="+s);
+                if (s!=null){
+                    Result result = ResultUtils.getResultFromJson(s, User.class);
                     Log.e("main","result="+result);
+                    if (result!=null && result.isRetMsg()){
+                        User user = (User) result.getRetData();
+                        if (user!=null){
+                            Log.e("main","user="+user);
+                        }
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<Result> call, Throwable t) {
+            public void onFailure(Call<String> call, Throwable t) {
 
             }
         });
@@ -188,14 +200,19 @@ public class MainActivity extends AppCompatActivity {
         @GET("findBoutiques")
         Call<List<BoutiqueBean>> listBoutique();
 
-        @GET("findCategoryChildren/{parent_id}")
-        Call<List<CategoryChildBean>> getChild(@Path("parent_id") int parentId);
+        @GET("findCategoryChildren")
+        Call<List<CategoryChildBean>> getChild(@Query("parent_id") String parentId);
 
-        @GET("findUserByUserName/{m_user_name}")
-        Call<Result> getUser(@Path("m_user_name") String username);
+        @GET("findUserByUserName")
+        Call<String> getUser(@Query("m_user_name") String username);
 
-        @GET("findGoodsDetails?cat_id=262&page_id=1&page_size=10")
-        Call<List<GoodsDetailsBean>> getGoodsList();
+//        @GET("findGoodsDetails/cat_id=262/page_id=1/page_size=10")
+        @GET("findGoodsDetails")
+        Call<List<GoodsDetailsBean>> getGoodsList(
+                @Query("cat_id") int catId,
+                @Query("page_id") int pageId,
+                @Query("page_size") int pageSize
+        );
 
     }
 
