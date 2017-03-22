@@ -19,6 +19,25 @@
         android:text="获取用户"
         />
 
+    <Button
+        android:id="@+id/btn_get_boutique"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获取精品数据"
+        />
+    <Button
+        android:id="@+id/btn_get_user_by_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获取用户数据"
+        />
+    <Button
+        android:id="@+id/btn_get_child"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获取小类"
+        />
+
     <TextView
         android:id="@+id/tv_text"
         android:layout_width="match_parent"
