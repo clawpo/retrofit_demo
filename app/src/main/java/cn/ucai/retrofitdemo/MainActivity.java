@@ -19,6 +19,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getRepos();
+                getUserString();
             }
         });
         fuli.setOnClickListener(new View.OnClickListener() {
@@ -110,13 +111,48 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         FuliServer server = retrofit.create(FuliServer.class);
+        Call<Result> resultCall = server.getUserToResult("aaa456789");
+        resultCall.enqueue(new Callback<Result>() {
+            @Override
+            public void onResponse(Call<Result> call, Response<Result> response) {
+                Log.e("main","call......."+call);
+                Log.e("main","response......."+response);
+                Log.e("main","response.body......"+response.body());
+                Result result = response.body();
+                Log.e("main","result......."+result);
+                if (result!=null){
+                    Log.e("main","result.getRet......"+result.getRetData());
+                    try {
+                        User user = (User) result.getRetData();
+                    }catch (Exception e){
+                        Log.e("main","e="+e);
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<Result> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getUserString() {
+        Log.e("main","getUser.......");
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(root)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+        FuliServer server = retrofit.create(FuliServer.class);
         Call<String> call = server.getUser("aaa456789");
         call.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 Log.e("main","call="+call);
                 Log.e("main","response="+response);
-                String s = response.body();
+                String s = response.body().toString();
                 Log.e("main","s="+s);
                 if (s!=null){
                     Result result = ResultUtils.getResultFromJson(s, User.class);
@@ -205,6 +241,9 @@ public class MainActivity extends AppCompatActivity {
 
         @GET("findUserByUserName")
         Call<String> getUser(@Query("m_user_name") String username);
+
+        @GET("findUserByUserName")
+        Call<Result> getUserToResult(@Query("m_user_name") String username);
 
 //        @GET("findGoodsDetails/cat_id=262/page_id=1/page_size=10")
         @GET("findGoodsDetails")
